@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarClock, ClipboardList, HandHeart, LayoutDashboard, MessageCircle, Settings, Sprout } from "lucide-react";
+import { CalendarClock, ClipboardList, HandHeart, LayoutDashboard, MessageCircle, Settings } from "lucide-react";
+import { LogoMark } from "@/components/logo";
 import { cn } from "@/lib/utils";
-import { APP_NAME } from "@/lib/constants";
 
 const LINKS = [
   { href: "/", label: "Dashboard", short: "Home", icon: LayoutDashboard },
@@ -37,8 +37,10 @@ export function Nav() {
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/[0.05] px-4 py-8 md:flex">
         <div className="mb-10 flex items-center gap-2.5 px-3 text-lg font-semibold tracking-tight">
-          <Sprout className="size-6 text-primary" />
-          {APP_NAME}
+          <LogoMark className="size-8" />
+          <span>
+            Plate<span className="text-primary">Share</span>
+          </span>
         </div>
         <nav className="flex flex-col gap-1">
           {LINKS.map((l) => (

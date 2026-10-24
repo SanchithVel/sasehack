@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="PlateShare logo">
+  <!-- Plate: outer rim and inner well -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#63D08F" stroke-width="4"/>
+  <circle cx="32" cy="32" r="19" fill="none" stroke="#63D08F" stroke-width="2" opacity="0.45"/>
+  <!-- Sprout growing from the plate -->
+  <path d="M32 45 V30" stroke="#63D08F" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M32 36 C24.5 36 20 31 20 24.5 C27 24.5 32 29 32 36 Z" fill="#63D08F"/>
+  <path d="M32 31 C32 23 37 18.5 45 18.5 C45 26.5 40 31 32 31 Z" fill="#63D08F"/>
+</svg>
