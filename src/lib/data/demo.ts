@@ -125,7 +125,6 @@ export function demoDb(): Db {
     records: demoRecords(),
     events: demoEvents(),
     tickets: demoTickets(),
-    website: null,
   };
 }
 
@@ -137,6 +136,5 @@ export function emptyDb(): Db {
     records: [],
     events: [],
     tickets: [],
-    website: null,
   };
 }

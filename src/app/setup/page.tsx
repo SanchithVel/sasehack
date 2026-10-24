@@ -87,7 +87,7 @@ export default function SetupPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               Business
-              <InfoTip align="start">Used for the weather forecast, nearby donation spots, emails, and your website.</InfoTip>
+              <InfoTip align="start">Used for the weather forecast, nearby donation spots, and emails.</InfoTip>
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">

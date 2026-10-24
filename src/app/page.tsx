@@ -3,12 +3,12 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { ClipboardList, HandHeart, Leaf, Settings, TrendingDown, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { InfoTip } from "@/components/info-tip";
 import { PageHeader } from "@/components/page-header";
 import { WasteTrendChart } from "@/components/waste-trend-chart";
 import { getDb } from "@/lib/db";
+import { cn } from "@/lib/utils";
 import { impactSummary, KG_CO2E_PER_KG_FOOD, LBS_PER_MEAL, topWastedItems, wasteByDay } from "@/lib/impact";
 
 export default function Dashboard() {
@@ -91,7 +91,7 @@ async function DashboardContent() {
       />
 
       {db.isDemo && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-amber-500/10 px-5 py-3.5 text-sm text-amber-200">
           <span>You&apos;re viewing sample data.</span>
           <Link href="/setup" className="font-medium underline underline-offset-4">
             Use my own business
@@ -99,7 +99,7 @@ async function DashboardContent() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {stats.map(({ label, value, sub, icon: Icon, info }, i) => (
           <Card key={label}>
             <CardContent className="space-y-1">
@@ -110,14 +110,14 @@ async function DashboardContent() {
                   {info}
                 </InfoTip>
               </div>
-              <div className="text-3xl font-semibold tracking-tight">{value}</div>
+              <div className="pt-2 text-4xl font-semibold tracking-tight">{value}</div>
               <div className="text-sm text-muted-foreground">{sub}</div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Daily waste (lbs)</CardTitle>
@@ -138,16 +138,16 @@ async function DashboardContent() {
               <InfoTip align="end">Last 30 days, ranked by what the waste cost you. The % is how much of what you prepped got thrown out.</InfoTip>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             {top.map((item) => (
               <div key={item.id} className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{item.name}</div>
                   <div className="text-sm text-muted-foreground">{item.wastedLbs} lbs</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={item.wasteRate > 15 ? "destructive" : "secondary"}>{item.wasteRate}%</Badge>
-                  <span className="w-14 text-right font-medium">${item.wastedCost}</span>
+                <div className="text-right">
+                  <div className="font-medium">${item.wastedCost}</div>
+                  <div className={cn("text-sm", item.wasteRate > 15 ? "text-red-400" : "text-muted-foreground")}>{item.wasteRate}% waste</div>
                 </div>
               </div>
             ))}

@@ -84,6 +84,8 @@
 }
 
 .dark {
+  /* Native controls (selects, date pickers, scrollbars) follow the dark theme. */
+  color-scheme: dark;
   --background: oklch(0.16 0.008 250);
   --foreground: oklch(0.96 0 0);
   --card: oklch(0.21 0.01 250);

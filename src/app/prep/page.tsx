@@ -129,7 +129,7 @@ export default function PrepPage() {
                     </InfoTip>
                   </div>
                   <div className="flex items-center gap-3 text-right">
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm text-muted-foreground">
                       usual {item.usualPrep} {item.unit}
                     </div>
                     <div className="text-lg font-semibold">

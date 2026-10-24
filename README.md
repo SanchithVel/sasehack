@@ -10,7 +10,7 @@ cp .env.example .env.local   # ANTHROPIC_API_KEY
 npm run dev                  # http://localhost:3000
 ```
 
-Everything works without an API key: the forecast summary, website, and outreach emails fall back to plain templates. Photo waste estimates and the assistant need a key.
+Everything works without an API key: the forecast summary and outreach emails fall back to plain templates. Photo waste estimates and the assistant need a key.
 
 ## How the data works
 
@@ -28,9 +28,8 @@ All data is saved to `data/db.json` (gitignored). **Load demo data** on the Setu
 |---|---|
 | Dashboard (`/`) | $ and lbs wasted, waste reduction, meals donated, tax deduction estimate, CO₂, trend chart, and how each number is calculated |
 | Daily Log (`/log`) | Manual daily entry plus an optional photo that fills in waste amounts |
-| Prep Forecast (`/prep`) | Next 7 days: avg sold on the same weekday (last 4 weeks), +10% if it sold out, × events, × weather (Open-Meteo), +5% buffer |
+| Prep Plan (`/prep`) | Next 7 days: avg sold on the same weekday (last 4 weeks), +10% if it sold out, × events, × weather (Open-Meteo), +5% buffer |
 | Donations (`/donations`) | Owner-managed tickets (upcoming / done / cancelled) for donation and compost drop-offs or pickups, plus nearby places, suppliers, a map, and one-click intro emails |
-| Website (`/website`) | Generates a one-page site from Setup data. Preview, copy, or download |
 | Assistant (`/assistant`) | Chat assistant with tools over the business's own data |
 | Setup (`/setup`) | Profile, menu, costs, events, and demo/reset |
 
@@ -44,7 +43,7 @@ All data is saved to `data/db.json` (gitignored). **Load demo data** on the Setu
 | `src/lib/forecast.ts` | Prep forecast logic |
 | `src/lib/impact.ts` | Waste, meals, CO₂, savings, and deduction calculations |
 | `src/lib/claude.ts` | Claude client, model, and refusal fallback config |
-| `src/lib/templates.ts` | Non-AI fallbacks for the website and emails |
+| `src/lib/templates.ts` | Non-AI fallback for outreach emails |
 | `src/app/api/*` | Route handlers (Claude calls stay server-side) |
 
 ## Notes

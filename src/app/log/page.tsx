@@ -169,7 +169,7 @@ export default function DailyLogPage() {
               <Input type="date" className="w-40" value={data.date} max={data.today} onChange={(e) => e.target.value && setDate(e.target.value)} />
             </CardHeader>
             <CardContent>
-              <div className="mb-2 hidden grid-cols-[1fr_5rem_5rem_5rem] gap-2 text-xs font-medium text-muted-foreground sm:grid">
+              <div className="mb-2 hidden grid-cols-[1fr_7rem_7rem_7rem] gap-2 text-sm font-medium text-muted-foreground sm:grid">
                 <span>Item</span>
                 <span>Prepared</span>
                 <span>Sold</span>
@@ -179,13 +179,13 @@ export default function DailyLogPage() {
                 {rows.map((r, i) => {
                   const m = itemOf(r.itemId);
                   return (
-                    <div key={r.itemId} className="grid grid-cols-3 items-center gap-2 py-2 sm:grid-cols-[1fr_5rem_5rem_5rem]">
+                    <div key={r.itemId} className="grid grid-cols-3 items-center gap-2 py-2 sm:grid-cols-[1fr_7rem_7rem_7rem]">
                       <div className="col-span-3 text-sm sm:col-span-1">
-                        <span className="font-medium">{m.name}</span> <span className="text-xs text-muted-foreground">({m.unit})</span>
+                        <span className="font-medium">{m.name}</span> <span className="text-sm text-muted-foreground">({m.unit})</span>
                       </div>
                       {(["prepared", "sold", "wasted"] as const).map((field) => (
                         <label key={field} className="flex flex-col gap-0.5">
-                          <span className="text-[10px] text-muted-foreground sm:hidden">
+                          <span className="text-xs text-muted-foreground sm:hidden">
                             {field === "wasted" ? "Thrown out" : field[0].toUpperCase() + field.slice(1)}
                           </span>
                           <Input
@@ -239,7 +239,7 @@ export default function DailyLogPage() {
                   ) : (
                     <>
                       <Camera className="size-7" />
-                      <span className="text-xs">Take or upload a photo</span>
+                      <span className="text-sm">Take or upload a photo</span>
                     </>
                   )}
                   {/* capture="environment" opens the rear camera on phones */}
@@ -264,9 +264,9 @@ export default function DailyLogPage() {
                       ))}
                     </ul>
                     {unmatched.length > 0 && (
-                      <p className="text-xs text-muted-foreground">Not on your menu, so not applied: {unmatched.map((d) => d.name).join(", ")}</p>
+                      <p className="text-sm text-muted-foreground">Not on your menu, so not applied: {unmatched.map((d) => d.name).join(", ")}</p>
                     )}
-                    {notes && <p className="rounded-lg bg-muted p-2 text-xs">{notes}</p>}
+                    {notes && <p className="rounded-lg bg-muted p-2 text-sm">{notes}</p>}
                     <Button variant="outline" className="w-full" onClick={applyPhoto}>
                       Apply to &quot;thrown out&quot;
                     </Button>

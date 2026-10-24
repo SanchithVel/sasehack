@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarClock, ClipboardList, Globe, HandHeart, LayoutDashboard, MessageCircle, Settings, Sprout } from "lucide-react";
+import { CalendarClock, ClipboardList, HandHeart, LayoutDashboard, MessageCircle, Settings, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { APP_NAME } from "@/lib/constants";
 
@@ -11,49 +11,52 @@ const LINKS = [
   { href: "/log", label: "Daily Log", short: "Log", icon: ClipboardList },
   { href: "/prep", label: "Prep Plan", short: "Prep", icon: CalendarClock },
   { href: "/donations", label: "Donations", short: "Donate", icon: HandHeart },
-  { href: "/website", label: "Website", short: "Website", icon: Globe },
   { href: "/assistant", label: "Assistant", short: "Ask", icon: MessageCircle },
-  { href: "/setup", label: "Setup", short: "Setup", icon: Settings },
 ];
+const SETUP = { href: "/setup", label: "Setup", short: "Setup", icon: Settings };
+
+function NavLink({ href, label, icon: Icon, active }: (typeof LINKS)[number] & { active: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] text-muted-foreground transition-colors hover:bg-white/[0.04] hover:text-foreground",
+        active && "bg-white/[0.06] font-medium text-foreground",
+      )}
+    >
+      <Icon className={cn("size-5", active && "text-primary")} />
+      {label}
+    </Link>
+  );
+}
 
 export function Nav() {
   const path = usePathname();
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r bg-card p-4 md:flex">
-        <div className="mb-8 flex items-center gap-2 font-semibold">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/[0.05] px-4 py-8 md:flex">
+        <div className="mb-10 flex items-center gap-2.5 px-3 text-lg font-semibold tracking-tight">
           <Sprout className="size-6 text-primary" />
           {APP_NAME}
         </div>
         <nav className="flex flex-col gap-1">
-          {LINKS.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted",
-                path === href && "bg-primary/10 font-medium text-primary",
-              )}
-            >
-              <Icon className="size-4" />
-              {label}
-            </Link>
+          {LINKS.map((l) => (
+            <NavLink key={l.href} {...l} active={path === l.href} />
           ))}
         </nav>
-        <p className="mt-auto text-xs text-muted-foreground">Less waste. More meals. Made for Oklahoma.</p>
+        <div className="mt-auto">
+          <NavLink {...SETUP} active={path === SETUP.href} />
+        </div>
       </aside>
 
       {/* Mobile bottom bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-[1000] flex border-t bg-card md:hidden">
-        {LINKS.map(({ href, short, icon: Icon }) => (
+      <nav className="fixed inset-x-0 bottom-0 z-[1000] flex border-t border-white/[0.06] bg-background/95 backdrop-blur md:hidden">
+        {[...LINKS, SETUP].map(({ href, short, icon: Icon }) => (
           <Link
             key={href}
             href={href}
-            className={cn(
-              "flex flex-1 flex-col items-center gap-1 py-2 text-[10px] text-muted-foreground",
-              path === href && "text-primary",
-            )}
+            className={cn("flex flex-1 flex-col items-center gap-1 py-3 text-xs text-muted-foreground", path === href && "text-primary")}
           >
             <Icon className="size-5" />
             {short}

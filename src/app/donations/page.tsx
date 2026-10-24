@@ -207,7 +207,7 @@ export default function DonationsPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">What&apos;s going</span>
+                <span className="text-sm font-medium text-muted-foreground">What&apos;s going</span>
                 <Button variant="ghost" size="sm" onClick={fillFromLog}>
                   <ClipboardList /> Use today&apos;s log
                 </Button>
@@ -256,7 +256,7 @@ export default function DonationsPage() {
                   tab === t.key ? "bg-card font-medium shadow-sm" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t.label} <span className="text-xs opacity-60">{tickets.filter((x) => x.status === t.key).length}</span>
+                {t.label} <span className="text-sm opacity-60">{tickets.filter((x) => x.status === t.key).length}</span>
               </button>
             ))}
           </div>

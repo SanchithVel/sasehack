@@ -51,7 +51,7 @@ export default function AssistantPage() {
       <PageHeader title="Assistant" info="Ask about your waste, prep, donations, suppliers, or running your business. Answers use your own logs and menu." />
 
       <Card>
-        <CardContent className="flex h-[60vh] flex-col gap-3">
+        <CardContent className="flex h-[68vh] flex-col gap-3">
           <div className="flex-1 space-y-3 overflow-y-auto">
             {messages.length === 0 && (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
@@ -69,7 +69,7 @@ export default function AssistantPage() {
               <div
                 key={i}
                 className={cn(
-                  "max-w-[85%] rounded-xl px-4 py-2 text-sm whitespace-pre-wrap",
+                  "max-w-[80%] rounded-2xl px-5 py-3 whitespace-pre-wrap",
                   m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted",
                 )}
               >

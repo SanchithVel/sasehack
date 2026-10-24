@@ -61,8 +61,6 @@ export type Ticket = {
   notes: string;
 };
 
-export type WebsiteDraft = { html: string; notes: string; createdAt: string };
-
 export type Db = {
   /** True while the app is showing generated demo data. */
   isDemo: boolean;
@@ -71,7 +69,6 @@ export type Db = {
   records: DailyRecord[];
   events: LocalEvent[];
   tickets: Ticket[];
-  website: WebsiteDraft | null;
 };
 
 export type PartnerType = "food_bank" | "shelter" | "pantry" | "farm" | "compost" | "supplier";
