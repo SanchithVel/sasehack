@@ -20,9 +20,11 @@ type Props = { center: { lat: number; lng: number; name: string }; partners: Par
 export default function PartnerMap({ center, partners }: Props) {
   return (
     <MapContainer center={[center.lat, center.lng]} zoom={8} scrollWheelZoom={false} className="z-0 h-72 w-full rounded-lg">
+      {/* Free OSM tiles, darkened in CSS (.map-tiles-dark) to match the theme — no API key needed. */}
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        className="map-tiles-dark"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <CircleMarker center={[center.lat, center.lng]} radius={10} pathOptions={{ color: "#f87171", fillOpacity: 0.9 }}>
         <Popup>{center.name || "Your business"} (you)</Popup>

@@ -130,3 +130,8 @@
     @apply font-sans;
   }
 }
+
+/* Dark map: invert the standard OSM tiles, then rotate hues back so water stays blue. */
+.leaflet-layer.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.6);
+}
