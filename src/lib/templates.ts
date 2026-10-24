@@ -1,4 +1,4 @@
-// Plain templates used when the Claude API isn't available, so every feature still works.
+// Plain templates used when the AI API isn't available, so every feature still works.
 import type { Db, Partner } from "@/lib/types";
 
 const esc = (s: string) =>

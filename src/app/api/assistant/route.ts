@@ -51,11 +51,12 @@ const tools = [
   }),
   betaZodTool({
     name: "get_impact",
-    description: "Impact so far: waste reduction, lbs and meals donated, compost, CO2 avoided, money saved, estimated tax deduction.",
+    description:
+      "Impact so far (from completed donation/compost tickets and daily logs): waste reduction, lbs and meals donated, compost, CO2 avoided, money saved, estimated tax deduction. Also returns recent tickets.",
     inputSchema: z.object({}),
     run: async () => {
       const db = getDb();
-      return JSON.stringify({ ...impactSummary(db), recentPickups: db.surplus.slice(0, 5) });
+      return JSON.stringify({ ...impactSummary(db), recentTickets: db.tickets.slice(0, 5) });
     },
   }),
   betaZodTool({

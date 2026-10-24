@@ -6,12 +6,12 @@ import { PARTNER_LABELS } from "@/lib/data/partners";
 import type { Partner } from "@/lib/types";
 
 export const PARTNER_COLORS: Record<Partner["type"], string> = {
-  food_bank: "#16a34a",
-  shelter: "#2563eb",
-  pantry: "#0891b2",
-  farm: "#ca8a04",
-  compost: "#92400e",
-  supplier: "#9333ea",
+  food_bank: "#4ade80",
+  shelter: "#60a5fa",
+  pantry: "#22d3ee",
+  farm: "#facc15",
+  compost: "#d97706",
+  supplier: "#c084fc",
 };
 
 type Props = { center: { lat: number; lng: number; name: string }; partners: Partner[] };
@@ -19,12 +19,12 @@ type Props = { center: { lat: number; lng: number; name: string }; partners: Par
 // Leaflet touches `window`, so load this with next/dynamic and ssr: false.
 export default function PartnerMap({ center, partners }: Props) {
   return (
-    <MapContainer center={[center.lat, center.lng]} zoom={8} scrollWheelZoom={false} className="z-0 h-80 w-full rounded-lg">
+    <MapContainer center={[center.lat, center.lng]} zoom={8} scrollWheelZoom={false} className="z-0 h-72 w-full rounded-lg">
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
-      <CircleMarker center={[center.lat, center.lng]} radius={10} pathOptions={{ color: "#dc2626", fillOpacity: 0.9 }}>
+      <CircleMarker center={[center.lat, center.lng]} radius={10} pathOptions={{ color: "#f87171", fillOpacity: 0.9 }}>
         <Popup>{center.name || "Your business"} (you)</Popup>
       </CircleMarker>
       {partners.map((p) => (

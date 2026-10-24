@@ -41,9 +41,9 @@ export async function POST(req: Request) {
         ],
       })
       .finalMessage();
-    if (message.stop_reason === "refusal") throw new Error("Claude declined this request");
+    if (message.stop_reason === "refusal") throw new Error("Request declined");
     html = textOf(message.content).replace(/^```(?:html)?\s*/i, "").replace(/```\s*$/, "").trim();
-    if (!html.toLowerCase().startsWith("<!doctype")) throw new Error("Unexpected response from Claude");
+    if (!html.toLowerCase().startsWith("<!doctype")) throw new Error("Unexpected response");
   } catch (err) {
     html = basicWebsite(db);
     usedAi = false;

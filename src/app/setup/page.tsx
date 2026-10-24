@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { CalendarPlus, Loader2, Plus, RotateCcw, Save, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InfoTip } from "@/components/info-tip";
 import { PageHeader } from "@/components/page-header";
 import { Field, Select } from "@/components/form";
 import { api } from "@/lib/api";
@@ -47,7 +48,7 @@ export default function SetupPage() {
     try {
       const saved = await api<Setup>("/api/setup", { profile, menu, events }, "PUT");
       setData(saved);
-      setMessage("Saved. Your forecast and dashboard now use these numbers.");
+      setMessage("Saved.");
     } catch (err) {
       setMessage((err as Error).message);
     } finally {
@@ -68,15 +69,12 @@ export default function SetupPage() {
 
   return (
     <>
-      <PageHeader
-        title="Business setup"
-        subtitle="Your menu, costs, and calendar drive every number in the app. Keep them accurate."
-      />
+      <PageHeader title="Setup" info="Your menu, costs, and calendar drive every number in the app, so keep them accurate." />
 
       {data.isDemo && (
-        <Card className="mb-4 border-amber-300 bg-amber-50 dark:bg-amber-950/30">
-          <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm">
-            <span>You&apos;re looking at demo data for a sample taco shop.</span>
+        <Card className="mb-4 bg-amber-500/10 ring-amber-500/30">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm text-amber-200">
+            <span>You&apos;re viewing sample data for a taco shop.</span>
             <Button onClick={() => reset("reset")}>
               <Sparkles /> Start with my own business
             </Button>
@@ -87,8 +85,10 @@ export default function SetupPage() {
       <div className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>Business details</CardTitle>
-            <CardDescription>Used for weather, nearby partners, outreach messages, and your website.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              Business
+              <InfoTip align="start">Used for the weather forecast, nearby donation spots, emails, and your website.</InfoTip>
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <Field label="Business name">
@@ -130,13 +130,16 @@ export default function SetupPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Menu items you prep daily</CardTitle>
-            <CardDescription>
-              Cost = what one unit costs you to make. Price = what one unit sells for. Weight converts units to pounds.
-            </CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              Menu
+              <InfoTip align="start">
+                Items you prep each day. Cost = what one unit costs you to make. Price = what one unit sells for. lbs/unit converts to
+                pounds (e.g. a dozen tortillas ≈ 1.1 lbs).
+              </InfoTip>
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {menu.length === 0 && <p className="text-sm text-muted-foreground">No items yet. Add what you cook each day.</p>}
+            {menu.length === 0 && <p className="text-sm text-muted-foreground">No items yet.</p>}
             {menu.map((m, i) => (
               <div key={m.id} className="grid grid-cols-2 gap-2 rounded-lg border p-3 sm:grid-cols-[2fr_1.4fr_1fr_1fr_1fr_1fr_1fr_auto] sm:items-end">
                 <Field label="Item" className="col-span-2 sm:col-span-1">
@@ -200,8 +203,10 @@ export default function SetupPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Upcoming events</CardTitle>
-            <CardDescription>Games, festivals, holidays, road closures… anything you expect to change how busy you are.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              Events
+              <InfoTip align="start">Games, festivals, holidays, road work: anything you expect to change how busy you are. Use + or − %.</InfoTip>
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {events.map((e, i) => (

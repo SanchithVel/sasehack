@@ -70,9 +70,9 @@ export function impactSummary(db: Db) {
   const recent = hasTrend ? avg(trend.slice(-7)) : 0;
   const reducedLbsPerDay = Math.max(0, before - recent);
 
-  const claimed = db.surplus.filter((p) => p.status === "claimed");
-  const donatedLbs = claimed.filter((p) => p.kind === "donate").reduce((s, p) => s + p.estLbs, 0);
-  const compostLbs = claimed.filter((p) => p.kind === "compost").reduce((s, p) => s + p.estLbs, 0);
+  const done = db.tickets.filter((t) => t.status === "completed");
+  const donatedLbs = done.filter((t) => t.kind === "donate").reduce((s, t) => s + t.estLbs, 0);
+  const compostLbs = done.filter((t) => t.kind === "compost").reduce((s, t) => s + t.estLbs, 0);
 
   const last30 = trend.filter((d) => d.date >= isoDate(addDays(new Date(), -30)));
   const { cost: costPerLb, price: pricePerLb } = perLb(db);
@@ -87,7 +87,7 @@ export function impactSummary(db: Db) {
     moneySavedPerMonth: hasTrend ? Math.round(reducedLbsPerDay * 30 * costPerLb) : null,
     donatedLbs: Math.round(donatedLbs),
     mealsDonated: Math.round(donatedLbs / LBS_PER_MEAL),
-    donations: claimed.filter((p) => p.kind === "donate").length,
+    donations: done.filter((t) => t.kind === "donate").length,
     compostLbs: Math.round(compostLbs),
     divertedLbs: Math.round(divertedLbs),
     co2eKg: Math.round(divertedLbs * 0.4536 * KG_CO2E_PER_KG_FOOD),

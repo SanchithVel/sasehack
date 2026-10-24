@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CloudRain, Loader2, PartyPopper, PiggyBank, Sparkles, Thermometer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoTip } from "@/components/info-tip";
 import { PageHeader } from "@/components/page-header";
 import { api } from "@/lib/api";
 import { weekday } from "@/lib/dates";
@@ -42,7 +43,7 @@ export default function PrepPage() {
 
   return (
     <>
-      <PageHeader title="Prep forecast" subtitle="Built from your daily logs, your event calendar, and the local weather forecast." />
+      <PageHeader title="Prep plan" info="How much to make each day. Starts from what you actually sold on the same weekday over the last 4 weeks (+10% if you sold out), then adjusts for your events and the weather forecast, plus a 5% buffer so you don&apos;t run out." />
 
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {days.map((d, i) => (
@@ -104,7 +105,7 @@ export default function PrepPage() {
           <Card className="mb-4 border-primary/30 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="size-4 text-primary" /> What to do differently on {data.weekday}
+                <Sparkles className="size-4 text-primary" /> Tips for {data.weekday}
               </CardTitle>
             </CardHeader>
             <CardContent className="whitespace-pre-line text-sm">{data.summary}</CardContent>
@@ -112,15 +113,20 @@ export default function PrepPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recommended quantities</CardTitle>
-              <CardDescription>Includes a 5% safety buffer so you don&apos;t run out.</CardDescription>
+              <CardTitle>How much to make</CardTitle>
             </CardHeader>
             <CardContent className="divide-y">
               {data.items.map((item) => (
                 <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                  <div>
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-muted-foreground">{item.reasons.join(" · ")}</div>
+                  <div className="flex items-center gap-1.5 font-medium">
+                    {item.name}
+                    <InfoTip align="start">
+                      <ul className="list-disc space-y-0.5 pl-4">
+                        {item.reasons.map((r) => (
+                          <li key={r}>{r}</li>
+                        ))}
+                      </ul>
+                    </InfoTip>
                   </div>
                   <div className="flex items-center gap-3 text-right">
                     <div className="text-xs text-muted-foreground">

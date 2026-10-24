@@ -18,7 +18,7 @@ The app starts with **demo data** (a sample OKC taco shop with 35 days of genera
 
 1. **Setup**: business details, the menu items you prep daily (unit, usual prep, cost and sale price per unit, lbs per unit), and upcoming events with an expected traffic change.
 2. **Daily Log**: at close, enter prepared / sold / thrown out for each item. "Thrown out" fills in as prepared − sold. A photo can optionally estimate it with Claude.
-3. **Surplus**: post leftovers for donation or compost. Claimed donations feed the meals, deduction, and CO₂ numbers.
+3. **Donations**: find nearby food banks, shelters, and compost services, and create a ticket for each drop-off or pickup. Marking a ticket done counts it toward meals, deduction, and CO₂.
 
 All data is saved to `data/db.json` (gitignored). **Load demo data** on the Setup page restores the sample.
 
@@ -29,9 +29,9 @@ All data is saved to `data/db.json` (gitignored). **Load demo data** on the Setu
 | Dashboard (`/`) | $ and lbs wasted, waste reduction, meals donated, tax deduction estimate, CO₂, trend chart, and how each number is calculated |
 | Daily Log (`/log`) | Manual daily entry plus an optional photo that fills in waste amounts |
 | Prep Forecast (`/prep`) | Next 7 days: avg sold on the same weekday (last 4 weeks), +10% if it sold out, × events, × weather (Open-Meteo), +5% buffer |
-| Surplus & Partners (`/surplus`) | Donate or compost posts, a simulated partner claim, the partner directory with distance, ratings, a map, and one-click intro emails |
-| Website Builder (`/website`) | Claude generates a one-page site from Setup data. Preview, copy, or download |
-| Assistant (`/assistant`) | Claude with tools over the business's own data |
+| Donations (`/donations`) | Owner-managed tickets (upcoming / done / cancelled) for donation and compost drop-offs or pickups, plus nearby places, suppliers, a map, and one-click intro emails |
+| Website (`/website`) | Generates a one-page site from Setup data. Preview, copy, or download |
+| Assistant (`/assistant`) | Chat assistant with tools over the business's own data |
 | Setup (`/setup`) | Profile, menu, costs, events, and demo/reset |
 
 ## Where things live
@@ -51,4 +51,5 @@ All data is saved to `data/db.json` (gitignored). **Load demo data** on the Setu
 
 - Partners marked `sample` are made up, including their ratings and prices. The real organizations have approximate map coordinates, so check them before demoing.
 - Impact numbers are estimates: 1.2 lbs per meal (Feeding America), 2.5 kg CO₂e per kg of food kept out of landfill, and a simplified enhanced-deduction formula (lesser of cost + half the markup, or 2× cost). This is not tax advice.
-- Text alerts to partners are simulated. Twilio would go in `src/app/api/surplus/route.ts`.
+- The app is for business owners only. Partners don't log in; tickets are the owner's own record of where leftovers went.
+- The UI never mentions the AI vendor. Code-level docs (this README, `src/lib/claude.ts`) still do.

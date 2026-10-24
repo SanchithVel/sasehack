@@ -27,9 +27,10 @@ export function textOf(content: Anthropic.Beta.BetaContentBlock[]) {
 
 export function errorMessage(err: unknown) {
   const noCredentials = err instanceof Error && err.message.includes("authentication method");
-  if (err instanceof Anthropic.AuthenticationError || noCredentials) return "Claude API key is missing or invalid. Set ANTHROPIC_API_KEY in .env.local.";
-  if (err instanceof Anthropic.RateLimitError) return "Rate limited by the Claude API. Try again in a moment.";
-  if (err instanceof Anthropic.APIError) return `Claude API error ${err.status}: ${err.message}`;
+  // These reach the owner, so keep them plain and free of vendor names.
+  if (err instanceof Anthropic.AuthenticationError || noCredentials) return "Smart features aren't set up yet (missing API key in .env.local).";
+  if (err instanceof Anthropic.RateLimitError) return "Too many requests right now. Try again in a moment.";
+  if (err instanceof Anthropic.APIError) return `Something went wrong (error ${err.status}). Try again.`;
   if (err instanceof Error) return err.message;
   return "Unknown error";
 }

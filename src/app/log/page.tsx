@@ -6,6 +6,7 @@ import { Camera, Check, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { InfoTip } from "@/components/info-tip";
 import { PageHeader } from "@/components/page-header";
 import { api } from "@/lib/api";
 import { weekday } from "@/lib/dates";
@@ -22,7 +23,7 @@ type LogData = {
 };
 type Detected = { name: string; quantity: number; unit: string; estLbs: number; itemId: string | null };
 
-/** Downscale a photo to a JPEG under Claude's image size limits. Returns base64 (no data: prefix). */
+/** Downscale a photo to a JPEG under the AI image size limits. Returns base64 (no data: prefix). */
 async function toJpegBase64(file: File, maxSide = 1280): Promise<string> {
   const img = await createImageBitmap(file);
   const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
@@ -143,7 +144,7 @@ export default function DailyLogPage() {
 
   return (
     <>
-      <PageHeader title="Daily log" subtitle="Enter what you prepped, sold, and threw out. Two minutes at close keeps every number accurate." />
+      <PageHeader title="Daily log" info="At close, enter what you prepped, sold, and threw out for each item. Thrown out fills in as prepared minus sold; change it if you donated or saved some. Every number in the app comes from this log." />
 
       {data.menu.length === 0 ? (
         <Card>
@@ -205,9 +206,6 @@ export default function DailyLogPage() {
                   );
                 })}
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                &quot;Thrown out&quot; fills in as prepared − sold. Change it if you donated or saved some.
-              </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button onClick={save} disabled={saveState === "saving"}>
                   {saveState === "saving" ? <Loader2 className="animate-spin" /> : <Save />} Save {weekday(data.date)}
@@ -228,9 +226,10 @@ export default function DailyLogPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Camera className="size-4" /> Fill from a photo
+                  <Camera className="size-4" /> Scan leftovers
+                  <InfoTip align="end">Optional. Snap a photo of what&apos;s left and we estimate the thrown-out amounts. Check them before saving.</InfoTip>
                 </CardTitle>
-                <CardDescription>Optional. Snap the leftovers and Claude estimates the &quot;thrown out&quot; amounts.</CardDescription>
+                
               </CardHeader>
               <CardContent className="space-y-3">
                 <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border-2 border-dashed text-muted-foreground hover:bg-muted/50">

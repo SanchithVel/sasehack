@@ -1,6 +1,6 @@
 // Demo data for "Maria's Tacos" so the app has something to show before an
 // owner enters their own numbers. Generated relative to today.
-import type { DailyRecord, Db, LocalEvent, MenuItem, Profile, SurplusPost } from "@/lib/types";
+import type { DailyRecord, Db, LocalEvent, MenuItem, Profile, Ticket } from "@/lib/types";
 import { addDays, isoDate } from "@/lib/dates";
 
 const HISTORY_DAYS = 35;
@@ -60,34 +60,51 @@ function demoRecords(): DailyRecord[] {
   return records;
 }
 
-function demoSurplus(): SurplusPost[] {
+function demoTickets(): Ticket[] {
   const today = new Date();
-  const partners = ["City Rescue Mission", "Regional Food Bank of Oklahoma", "Homeless Alliance Day Shelter"];
-  const donations: SurplusPost[] = Array.from({ length: 8 }, (_, i) => ({
+  const at = (daysAgo: number, time: string) => `${isoDate(addDays(today, -daysAgo))}T${time}`;
+  const partners = ["city-rescue", "rfbo", "homeless-alliance"];
+  const donations: Ticket[] = Array.from({ length: 8 }, (_, i) => ({
     id: `demo-${i}`,
     createdAt: addDays(today, -(i * 4 + 1)).toISOString(),
     kind: "donate",
+    partnerId: partners[i % partners.length],
+    method: i % 2 ? "pickup" : "drop-off",
+    scheduledFor: at(i * 4 + 1, "21:30"),
     items: [
       { name: "Mexican rice", quantity: 4 + (i % 3), unit: "lbs" },
       { name: "Carne asada", quantity: 3 + (i % 2), unit: "lbs" },
       { name: "Corn tortillas", quantity: 5, unit: "dozen" },
     ],
     estLbs: 13 + (i % 3) + (i % 2),
-    pickupBy: "9:30 PM",
-    status: "claimed",
-    claimedBy: partners[i % partners.length],
+    status: "completed",
+    notes: "",
   }));
-  const compost: SurplusPost = {
+  const compost: Ticket = {
     id: "demo-compost",
     createdAt: addDays(today, -3).toISOString(),
     kind: "compost",
+    partnerId: "red-dirt-compost",
+    method: "pickup",
+    scheduledFor: at(3, "08:00"),
     items: [{ name: "Vegetable scraps and spoiled produce", quantity: 22, unit: "lbs" }],
     estLbs: 22,
-    pickupBy: "Friday AM",
-    status: "claimed",
-    claimedBy: "Red Dirt Compost Co.",
+    status: "completed",
+    notes: "Weekly bin swap",
   };
-  return [compost, ...donations].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const tonight: Ticket = {
+    id: "demo-tonight",
+    createdAt: today.toISOString(),
+    kind: "donate",
+    partnerId: "city-rescue",
+    method: "drop-off",
+    scheduledFor: at(0, "21:30"),
+    items: [{ name: "Chicken tinga", quantity: 4, unit: "lbs" }],
+    estLbs: 4,
+    status: "scheduled",
+    notes: "Use the side door",
+  };
+  return [tonight, compost, ...donations].sort((a, b) => b.scheduledFor.localeCompare(a.scheduledFor));
 }
 
 function demoEvents(): LocalEvent[] {
@@ -107,7 +124,7 @@ export function demoDb(): Db {
     menu: DEMO_MENU,
     records: demoRecords(),
     events: demoEvents(),
-    surplus: demoSurplus(),
+    tickets: demoTickets(),
     website: null,
   };
 }
@@ -119,7 +136,7 @@ export function emptyDb(): Db {
     menu: [],
     records: [],
     events: [],
-    surplus: [],
+    tickets: [],
     website: null,
   };
 }

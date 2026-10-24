@@ -48,7 +48,7 @@ export default function AssistantPage() {
 
   return (
     <>
-      <PageHeader title="Assistant" subtitle="Ask about your waste, prep, partners, or running the business. It uses your real data." />
+      <PageHeader title="Assistant" info="Ask about your waste, prep, donations, suppliers, or running your business. Answers use your own logs and menu." />
 
       <Card>
         <CardContent className="flex h-[60vh] flex-col gap-3">

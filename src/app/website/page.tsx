@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, Download, Globe, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/page-header";
 import { api } from "@/lib/api";
@@ -58,16 +58,12 @@ export default function WebsitePage() {
 
   return (
     <>
-      <PageHeader
-        title="Website builder"
-        subtitle="Claude drafts a one-page site from your business details and menu. Download it and host it anywhere."
-      />
+      <PageHeader title="Website" info="Get a one-page website made from your Setup details: name, menu, prices, hours, and address. Describe the look you want, then preview, copy, or download it to host anywhere." />
 
       <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Describe what you want</CardTitle>
-            <CardDescription>Name, menu, prices, hours, and address come from Setup automatically.</CardDescription>
+            <CardTitle>Describe the look</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Style, colors, sections, specials…" />

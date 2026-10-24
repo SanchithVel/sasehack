@@ -9,9 +9,9 @@ import { APP_NAME } from "@/lib/constants";
 const LINKS = [
   { href: "/", label: "Dashboard", short: "Home", icon: LayoutDashboard },
   { href: "/log", label: "Daily Log", short: "Log", icon: ClipboardList },
-  { href: "/prep", label: "Prep Forecast", short: "Prep", icon: CalendarClock },
-  { href: "/surplus", label: "Surplus & Partners", short: "Surplus", icon: HandHeart },
-  { href: "/website", label: "Website Builder", short: "Website", icon: Globe },
+  { href: "/prep", label: "Prep Plan", short: "Prep", icon: CalendarClock },
+  { href: "/donations", label: "Donations", short: "Donate", icon: HandHeart },
+  { href: "/website", label: "Website", short: "Website", icon: Globe },
   { href: "/assistant", label: "Assistant", short: "Ask", icon: MessageCircle },
   { href: "/setup", label: "Setup", short: "Setup", icon: Settings },
 ];
@@ -21,7 +21,7 @@ export function Nav() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r bg-background p-4 md:flex">
+      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r bg-card p-4 md:flex">
         <div className="mb-8 flex items-center gap-2 font-semibold">
           <Sprout className="size-6 text-primary" />
           {APP_NAME}
@@ -45,7 +45,7 @@ export function Nav() {
       </aside>
 
       {/* Mobile bottom bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-[1000] flex border-t bg-background md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-[1000] flex border-t bg-card md:hidden">
         {LINKS.map(({ href, short, icon: Icon }) => (
           <Link
             key={href}

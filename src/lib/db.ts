@@ -10,7 +10,15 @@ const FILE = path.join(process.cwd(), "data", "db.json");
 
 export function getDb(): Db {
   try {
-    return JSON.parse(fs.readFileSync(FILE, "utf8")) as Db;
+    const db = JSON.parse(fs.readFileSync(FILE, "utf8")) as Db & { surplus?: unknown };
+    // Files from before tickets existed: reseed demo data, or start an empty ticket list.
+    if (!Array.isArray(db.tickets)) {
+      const upgraded: Db = db.isDemo ? { ...demoDb(), website: db.website } : { ...db, tickets: [] };
+      delete (upgraded as typeof db).surplus;
+      saveDb(upgraded);
+      return upgraded;
+    }
+    return db;
   } catch {
     const db = demoDb();
     saveDb(db);

@@ -46,15 +46,19 @@ export type LocalEvent = {
   changePct: number;
 };
 
-export type SurplusPost = {
+/** The owner's record of leftovers going to a donation or compost partner. */
+export type Ticket = {
   id: string;
   createdAt: string;
   kind: "donate" | "compost";
+  partnerId: string;
+  method: "drop-off" | "pickup";
+  /** Local date-time, YYYY-MM-DDTHH:mm. */
+  scheduledFor: string;
   items: { name: string; quantity: number; unit: string }[];
   estLbs: number;
-  pickupBy: string;
-  status: "open" | "claimed";
-  claimedBy?: string;
+  status: "scheduled" | "completed" | "cancelled";
+  notes: string;
 };
 
 export type WebsiteDraft = { html: string; notes: string; createdAt: string };
@@ -66,7 +70,7 @@ export type Db = {
   menu: MenuItem[];
   records: DailyRecord[];
   events: LocalEvent[];
-  surplus: SurplusPost[];
+  tickets: Ticket[];
   website: WebsiteDraft | null;
 };
 
