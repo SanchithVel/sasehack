@@ -6,7 +6,7 @@ Helps small Oklahoma food businesses **predict** how much to prep, **track** wha
 
 ```bash
 npm install
-cp .env.example .env.local   # then paste your ANTHROPIC_API_KEY
+cp .env.example .env.local   # ANTHROPIC_API_KEY
 npm run dev                  # http://localhost:3000
 ```
 
