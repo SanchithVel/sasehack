@@ -1,4 +1,4 @@
-# PlateShare OK
+# PlateShare
 
 Helps small Oklahoma food businesses **predict** how much to prep, **track** what they waste, **redistribute** surplus to local food banks, shelters, and compost, and **measure** their community impact.
 

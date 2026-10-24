@@ -1,6 +1,6 @@
 import type { Category, Unit } from "@/lib/types";
 
-export const APP_NAME = "PlateShare OK";
+export const APP_NAME = "PlateShare";
 
 export const CATEGORIES: { value: Category; label: string }[] = [
   { value: "main", label: "Main / protein" },
