@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, Check, Loader2, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { Camera, Check, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/page-header";
+import { api } from "@/lib/api";
+import { weekday } from "@/lib/dates";
+import type { DailyRecord, MenuItem } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
-type Item = { name: string; quantity: number; unit: string; estLbs: number; itemId: string | null };
+type Row = { itemId: string; prepared: string; sold: string; wasted: string; wastedEdited: boolean };
+type LogData = {
+  date: string;
+  today: string;
+  menu: MenuItem[];
+  entries: DailyRecord[];
+  recent: { date: string; lbs: number; cost: number }[];
+};
+type Detected = { name: string; quantity: number; unit: string; estLbs: number; itemId: string | null };
 
 /** Downscale a photo to a JPEG under Claude's image size limits. Returns base64 (no data: prefix). */
 async function toJpegBase64(file: File, maxSide = 1280): Promise<string> {
@@ -20,128 +33,277 @@ async function toJpegBase64(file: File, maxSide = 1280): Promise<string> {
   return canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
 }
 
-export default function LogWastePage() {
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+const fetchLog = (date?: string) => api<LogData>(`/api/records${date ? `?date=${date}` : ""}`);
+
+/** One editable row per menu item, pre-filled from any saved entry. */
+const toRows = (res: LogData): Row[] =>
+  res.menu.map((m) => {
+    const e = res.entries.find((x) => x.itemId === m.id);
+    return e
+      ? { itemId: m.id, prepared: String(e.prepared), sold: String(e.sold), wasted: String(e.wasted), wastedEdited: true }
+      : { itemId: m.id, prepared: String(m.usualPrep), sold: "", wasted: "", wastedEdited: false };
+  });
+
+export default function DailyLogPage() {
+  const [date, setDate] = useState<string>(); // undefined = today (server decides)
+  const [data, setData] = useState<LogData>();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+
+  // Photo helper state
   const [preview, setPreview] = useState<string>();
-  const [items, setItems] = useState<Item[]>([]);
+  const [detected, setDetected] = useState<Detected[]>([]);
   const [notes, setNotes] = useState("");
-  const [status, setStatus] = useState<"idle" | "analyzing" | "ready" | "saved">("idle");
-  const [error, setError] = useState("");
+  const [photoState, setPhotoState] = useState<"idle" | "analyzing" | "done">("idle");
+  const [photoError, setPhotoError] = useState("");
+
+  const show = useCallback((res: LogData) => {
+    setData(res);
+    setRows(toRows(res));
+    setSaveState("idle");
+  }, []);
+
+  useEffect(() => {
+    fetchLog(date).then(show);
+  }, [date, show]);
+
+  function setRow(i: number, patch: Partial<Row>) {
+    setSaveState("idle");
+    setRows((prev) =>
+      prev.map((r, j) => {
+        if (j !== i) return r;
+        const next = { ...r, ...patch };
+        // Until the owner types a waste number, assume leftovers = prepared - sold.
+        if (!next.wastedEdited && next.sold !== "") {
+          next.wasted = String(round1(Math.max(0, Number(next.prepared) - Number(next.sold))));
+        }
+        return next;
+      }),
+    );
+  }
+
+  async function save() {
+    setSaveState("saving");
+    const entries = rows
+      .filter((r) => r.sold !== "" || r.wasted !== "")
+      .map((r) => ({ itemId: r.itemId, prepared: Number(r.prepared), sold: Number(r.sold), wasted: Number(r.wasted) }));
+    await api("/api/records", { date: data!.date, entries }, "PUT");
+    show(await fetchLog(data!.date));
+    setSaveState("saved");
+  }
 
   async function onPhoto(file: File | undefined) {
     if (!file) return;
     setPreview(URL.createObjectURL(file));
-    setItems([]);
-    setError("");
-    setStatus("analyzing");
-    const res = await fetch("/api/analyze-waste", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: await toJpegBase64(file) }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error);
-      setStatus("idle");
-      return;
+    setDetected([]);
+    setPhotoError("");
+    setPhotoState("analyzing");
+    try {
+      const res = await api<{ items: Detected[]; notes: string }>("/api/analyze-waste", { image: await toJpegBase64(file) });
+      setDetected(res.items);
+      setNotes(res.notes);
+      setPhotoState("done");
+    } catch (err) {
+      setPhotoError((err as Error).message);
+      setPhotoState("idle");
     }
-    setItems(data.items);
-    setNotes(data.notes);
-    setStatus("ready");
   }
 
-  const update = (i: number, patch: Partial<Item>) =>
-    setItems((prev) => prev.map((it, j) => (j === i ? { ...it, ...patch } : it)));
-
-  async function save() {
-    await fetch("/api/waste", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items, source: "photo" }),
-    });
-    setStatus("saved");
+  function applyPhoto() {
+    setRows((prev) =>
+      prev.map((r) => {
+        const hit = detected.filter((d) => d.itemId === r.itemId);
+        if (!hit.length) return r;
+        return { ...r, wasted: String(round1(hit.reduce((s, d) => s + d.quantity, 0))), wastedEdited: true };
+      }),
+    );
+    setSaveState("idle");
   }
 
-  const totalLbs = items.reduce((s, i) => s + Number(i.estLbs || 0), 0);
+  if (!data) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" /> Loading…
+      </div>
+    );
+  }
+
+  const itemOf = (id: string) => data.menu.find((m) => m.id === id)!;
+  const totals = rows.reduce(
+    (t, r) => {
+      const m = itemOf(r.itemId);
+      const w = Number(r.wasted) || 0;
+      return { lbs: t.lbs + w * m.lbsPerUnit, cost: t.cost + w * m.costPerUnit };
+    },
+    { lbs: 0, cost: 0 },
+  );
+  const unmatched = detected.filter((d) => !d.itemId || !data.menu.some((m) => m.id === d.itemId));
 
   return (
     <>
-      <PageHeader title="Log tonight's waste" subtitle="Snap a photo of the leftovers. Claude itemizes it for you." />
+      <PageHeader title="Daily log" subtitle="Enter what you prepped, sold, and threw out. Two minutes at close keeps every number accurate." />
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      {data.menu.length === 0 ? (
         <Card>
-          <CardContent>
-            <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-dashed text-muted-foreground hover:bg-muted/50">
-              {preview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={preview} alt="Leftovers" className="size-full object-cover" />
-              ) : (
-                <>
-                  <Camera className="size-10" />
-                  <span className="text-sm">Tap to take or upload a photo</span>
-                </>
-              )}
-              {/* capture="environment" opens the rear camera on phones */}
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => onPhoto(e.target.files?.[0])}
-              />
-            </label>
+          <CardContent className="text-sm">
+            Add your menu items first on the{" "}
+            <Link href="/setup" className="font-medium text-primary underline">
+              Setup page
+            </Link>
+            .
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Detected leftovers</CardTitle>
-            <CardDescription>
-              {status === "ready" || status === "saved"
-                ? `About ${totalLbs.toFixed(1)} lbs total. Edit anything that looks off.`
-                : "Results show up here."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {status === "analyzing" && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin" /> Analyzing photo…
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+          <Card>
+            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <CardTitle>{weekday(data.date)}</CardTitle>
+                <CardDescription>
+                  {data.entries.length ? "Already logged. Edit and save to update." : "Not logged yet."}
+                </CardDescription>
               </div>
-            )}
-            {error && <p className="text-sm text-destructive">{error}</p>}
-
-            {items.map((item, i) => (
-              <div key={i} className="grid grid-cols-[1fr_4.5rem_4.5rem_auto] items-center gap-2">
-                <Input value={item.name} onChange={(e) => update(i, { name: e.target.value })} />
-                <Input
-                  type="number"
-                  value={item.quantity}
-                  onChange={(e) => update(i, { quantity: Number(e.target.value) })}
-                  aria-label="Quantity"
-                />
-                <span className="text-xs text-muted-foreground">
-                  {item.unit} · {item.estLbs} lb
-                </span>
-                <Button variant="ghost" size="icon" onClick={() => setItems(items.filter((_, j) => j !== i))}>
-                  <Trash2 />
-                </Button>
+              <Input type="date" className="w-40" value={data.date} max={data.today} onChange={(e) => e.target.value && setDate(e.target.value)} />
+            </CardHeader>
+            <CardContent>
+              <div className="mb-2 hidden grid-cols-[1fr_5rem_5rem_5rem] gap-2 text-xs font-medium text-muted-foreground sm:grid">
+                <span>Item</span>
+                <span>Prepared</span>
+                <span>Sold</span>
+                <span>Thrown out</span>
               </div>
-            ))}
-
-            {notes && <p className="rounded-lg bg-muted p-3 text-sm">{notes}</p>}
-
-            {status === "ready" && items.length > 0 && (
-              <Button onClick={save} className="w-full">
-                Save to today&apos;s log
-              </Button>
-            )}
-            {status === "saved" && (
-              <p className="flex items-center gap-2 text-sm font-medium text-primary">
-                <Check className="size-4" /> Saved. Have extra? Post it on the Surplus page for a pickup.
+              <div className="divide-y">
+                {rows.map((r, i) => {
+                  const m = itemOf(r.itemId);
+                  return (
+                    <div key={r.itemId} className="grid grid-cols-3 items-center gap-2 py-2 sm:grid-cols-[1fr_5rem_5rem_5rem]">
+                      <div className="col-span-3 text-sm sm:col-span-1">
+                        <span className="font-medium">{m.name}</span> <span className="text-xs text-muted-foreground">({m.unit})</span>
+                      </div>
+                      {(["prepared", "sold", "wasted"] as const).map((field) => (
+                        <label key={field} className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-muted-foreground sm:hidden">
+                            {field === "wasted" ? "Thrown out" : field[0].toUpperCase() + field.slice(1)}
+                          </span>
+                          <Input
+                            type="number"
+                            min={0}
+                            step="0.1"
+                            inputMode="decimal"
+                            value={r[field]}
+                            placeholder="0"
+                            className={cn(field === "wasted" && !r.wastedEdited && r.wasted && "text-muted-foreground")}
+                            onChange={(e) =>
+                              setRow(i, field === "wasted" ? { wasted: e.target.value, wastedEdited: true } : { [field]: e.target.value })
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                &quot;Thrown out&quot; fills in as prepared − sold. Change it if you donated or saved some.
               </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Button onClick={save} disabled={saveState === "saving"}>
+                  {saveState === "saving" ? <Loader2 className="animate-spin" /> : <Save />} Save {weekday(data.date)}
+                </Button>
+                <span className="text-sm">
+                  Waste: <strong>{round1(totals.lbs)} lbs</strong> · <strong>${Math.round(totals.cost)}</strong>
+                </span>
+                {saveState === "saved" && (
+                  <span className="flex items-center gap-1 text-sm text-primary">
+                    <Check className="size-4" /> Saved
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="size-4" /> Fill from a photo
+                </CardTitle>
+                <CardDescription>Optional. Snap the leftovers and Claude estimates the &quot;thrown out&quot; amounts.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border-2 border-dashed text-muted-foreground hover:bg-muted/50">
+                  {preview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={preview} alt="Leftovers" className="size-full object-cover" />
+                  ) : (
+                    <>
+                      <Camera className="size-7" />
+                      <span className="text-xs">Take or upload a photo</span>
+                    </>
+                  )}
+                  {/* capture="environment" opens the rear camera on phones */}
+                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => onPhoto(e.target.files?.[0])} />
+                </label>
+                {photoState === "analyzing" && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin" /> Analyzing photo…
+                  </div>
+                )}
+                {photoError && <p className="text-sm text-destructive">{photoError}</p>}
+                {photoState === "done" && (
+                  <>
+                    <ul className="space-y-1 text-sm">
+                      {detected.map((d, i) => (
+                        <li key={i} className="flex justify-between">
+                          <span>{d.name}</span>
+                          <span className="text-muted-foreground">
+                            {d.quantity} {d.unit} · {d.estLbs} lb
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {unmatched.length > 0 && (
+                      <p className="text-xs text-muted-foreground">Not on your menu, so not applied: {unmatched.map((d) => d.name).join(", ")}</p>
+                    )}
+                    {notes && <p className="rounded-lg bg-muted p-2 text-xs">{notes}</p>}
+                    <Button variant="outline" className="w-full" onClick={applyPhoto}>
+                      Apply to &quot;thrown out&quot;
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent days</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {data.recent.length === 0 && <p className="text-sm text-muted-foreground">Nothing logged yet.</p>}
+                {data.recent.map((d) => (
+                  <button
+                    key={d.date}
+                    onClick={() => setDate(d.date)}
+                    className={cn(
+                      "flex w-full justify-between rounded-md px-2 py-1 text-sm hover:bg-muted",
+                      d.date === data.date && "bg-primary/10 text-primary",
+                    )}
+                  >
+                    <span>
+                      {weekday(d.date).slice(0, 3)} {d.date.slice(5)}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {d.lbs} lb · ${d.cost}
+                    </span>
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
     </>
   );
 }

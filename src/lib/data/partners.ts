@@ -1,7 +1,7 @@
 import type { Partner } from "@/lib/types";
 
 // Real organizations use approximate coordinates; verify details before the demo.
-// Entries marked `sample` are made up for the demo.
+// Entries marked `sample` are made up for the demo (including ratings).
 export const PARTNERS: Partner[] = [
   {
     id: "rfbo",
@@ -11,7 +11,7 @@ export const PARTNERS: Partner[] = [
     lat: 35.4106,
     lng: -97.6145,
     description: "Largest hunger-relief nonprofit in the state; partners with restaurants on food rescue.",
-    accepts: ["prepared food", "produce", "packaged goods"],
+    offers: "Accepts prepared food, produce, and packaged goods",
   },
   {
     id: "fbeo",
@@ -21,7 +21,7 @@ export const PARTNERS: Partner[] = [
     lat: 36.1716,
     lng: -95.9637,
     description: "Serves 24 counties in eastern Oklahoma through partner agencies.",
-    accepts: ["prepared food", "produce", "packaged goods"],
+    offers: "Accepts prepared food, produce, and packaged goods",
   },
   {
     id: "city-rescue",
@@ -31,7 +31,7 @@ export const PARTNERS: Partner[] = [
     lat: 35.4628,
     lng: -97.5285,
     description: "Emergency shelter serving daily meals to people experiencing homelessness.",
-    accepts: ["prepared food", "bread", "produce"],
+    offers: "Accepts prepared food, bread, and produce",
   },
   {
     id: "homeless-alliance",
@@ -41,7 +41,17 @@ export const PARTNERS: Partner[] = [
     lat: 35.4705,
     lng: -97.5383,
     description: "Day shelter in OKC offering meals and services.",
-    accepts: ["prepared food", "bread"],
+    offers: "Accepts prepared food and bread",
+  },
+  {
+    id: "tulsa-day-center",
+    name: "Tulsa Day Center",
+    type: "shelter",
+    city: "Tulsa",
+    lat: 36.1497,
+    lng: -95.9947,
+    description: "Day and night shelter in downtown Tulsa serving meals daily.",
+    offers: "Accepts prepared food and bread",
   },
   {
     id: "northside-pantry",
@@ -51,7 +61,18 @@ export const PARTNERS: Partner[] = [
     lat: 35.5201,
     lng: -97.5102,
     description: "Neighborhood pantry open Tue/Thu/Sat evenings.",
-    accepts: ["produce", "bread", "packaged goods"],
+    offers: "Accepts produce, bread, and packaged goods",
+    sample: true,
+  },
+  {
+    id: "norman-pantry",
+    name: "Cleveland County Food Pantry",
+    type: "pantry",
+    city: "Norman",
+    lat: 35.2201,
+    lng: -97.4421,
+    description: "Volunteer-run pantry serving Norman and Moore families.",
+    offers: "Accepts produce, bread, and packaged goods",
     sample: true,
   },
   {
@@ -61,9 +82,23 @@ export const PARTNERS: Partner[] = [
     city: "Oklahoma City",
     lat: 35.4402,
     lng: -97.4801,
-    description: "Weekly bin pickup for food scraps; returns finished compost to local farms.",
-    accepts: ["food scraps", "spoiled produce"],
+    description: "Weekly 64-gal bin pickup for food scraps; finished compost goes to local farms.",
+    offers: "Pickup from $25/week · free bins",
     rating: 4.7,
+    reviews: 38,
+    sample: true,
+  },
+  {
+    id: "green-country-compost",
+    name: "Green Country Compost",
+    type: "compost",
+    city: "Tulsa",
+    lat: 36.1102,
+    lng: -95.9201,
+    description: "Commercial food-scrap collection for Tulsa-area restaurants.",
+    offers: "Pickup from $30/week",
+    rating: 4.4,
+    reviews: 21,
     sample: true,
   },
   {
@@ -73,9 +108,23 @@ export const PARTNERS: Partner[] = [
     city: "Edmond",
     lat: 35.6528,
     lng: -97.4781,
-    description: "Small family farm: tomatoes, onions, peppers, cilantro. Takes compost.",
-    accepts: ["compost"],
+    description: "Family farm growing tomatoes, onions, peppers, and cilantro. Trades produce for compostable scraps.",
+    offers: "Produce boxes weekly · takes food scraps",
     rating: 4.8,
+    reviews: 54,
+    sample: true,
+  },
+  {
+    id: "cimarron-produce",
+    name: "Cimarron Valley Produce",
+    type: "farm",
+    city: "Stillwater",
+    lat: 36.1156,
+    lng: -97.0584,
+    description: "Seasonal vegetables and pecans. Delivers to OKC and Tulsa on Wednesdays.",
+    offers: "Wholesale produce · 10% off standing orders",
+    rating: 4.5,
+    reviews: 33,
     sample: true,
   },
   {
@@ -83,23 +132,51 @@ export const PARTNERS: Partner[] = [
     name: "Canadian River Ranch",
     type: "supplier",
     city: "Norman",
-    lat: 35.2226,
-    lng: -97.4395,
-    description: "Grass-fed beef raised in Oklahoma. Weekly delivery to OKC metro, 20 lb minimum.",
-    accepts: [],
+    lat: 35.2026,
+    lng: -97.4095,
+    description: "Grass-fed beef raised in Oklahoma. Weekly delivery to the OKC metro, 20 lb minimum.",
+    offers: "Beef: brisket, skirt, ground · ~$6.80/lb",
     rating: 4.6,
+    reviews: 47,
     sample: true,
   },
   {
-    id: "okc-poultry",
+    id: "sooner-poultry",
     name: "Sooner State Poultry",
     type: "supplier",
     city: "Shawnee",
     lat: 35.3273,
     lng: -96.9253,
     description: "Pasture-raised chicken, delivered twice weekly. Lower cost per lb at volume.",
-    accepts: [],
+    offers: "Chicken: whole, thighs, breast · ~$3.10/lb",
     rating: 4.3,
+    reviews: 29,
+    sample: true,
+  },
+  {
+    id: "red-earth-pork",
+    name: "Red Earth Heritage Pork",
+    type: "supplier",
+    city: "Guthrie",
+    lat: 35.8789,
+    lng: -97.4253,
+    description: "Small-batch heritage pork. Custom cuts for al pastor and carnitas.",
+    offers: "Pork shoulder, belly · ~$4.40/lb",
+    rating: 4.9,
+    reviews: 18,
+    sample: true,
+  },
+  {
+    id: "metro-wholesale",
+    name: "Metro Restaurant Wholesale",
+    type: "supplier",
+    city: "Oklahoma City",
+    lat: 35.4401,
+    lng: -97.5702,
+    description: "Broadline distributor: meat, dairy, dry goods. Next-day delivery, no minimum.",
+    offers: "All categories · convenience pricing",
+    rating: 3.9,
+    reviews: 112,
     sample: true,
   },
 ];
@@ -112,3 +189,15 @@ export const PARTNER_LABELS: Record<Partner["type"], string> = {
   compost: "Compost",
   supplier: "Supplier",
 };
+
+export const DONATION_TYPES: Partner["type"][] = ["food_bank", "shelter", "pantry"];
+export const COMPOST_TYPES: Partner["type"][] = ["compost", "farm"];
+
+/** Straight-line distance in miles. */
+export function milesBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 3958.8 * 2 * Math.asin(Math.sqrt(h));
+}

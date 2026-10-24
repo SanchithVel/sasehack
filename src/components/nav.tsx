@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Camera, CalendarClock, HandHeart, LayoutDashboard, MessageCircle, Sprout } from "lucide-react";
+import { CalendarClock, ClipboardList, Globe, HandHeart, LayoutDashboard, MessageCircle, Settings, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { APP_NAME, BUSINESS } from "@/lib/data/business";
+import { APP_NAME } from "@/lib/constants";
 
 const LINKS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/log", label: "Log Waste", icon: Camera },
-  { href: "/prep", label: "Prep", icon: CalendarClock },
-  { href: "/surplus", label: "Surplus", icon: HandHeart },
-  { href: "/assistant", label: "Assistant", icon: MessageCircle },
+  { href: "/", label: "Dashboard", short: "Home", icon: LayoutDashboard },
+  { href: "/log", label: "Daily Log", short: "Log", icon: ClipboardList },
+  { href: "/prep", label: "Prep Forecast", short: "Prep", icon: CalendarClock },
+  { href: "/surplus", label: "Surplus & Partners", short: "Surplus", icon: HandHeart },
+  { href: "/website", label: "Website Builder", short: "Website", icon: Globe },
+  { href: "/assistant", label: "Assistant", short: "Ask", icon: MessageCircle },
+  { href: "/setup", label: "Setup", short: "Setup", icon: Settings },
 ];
 
 export function Nav() {
@@ -39,26 +41,22 @@ export function Nav() {
             </Link>
           ))}
         </nav>
-        <div className="mt-auto text-xs text-muted-foreground">
-          {BUSINESS.name}
-          <br />
-          {BUSINESS.city}
-        </div>
+        <p className="mt-auto text-xs text-muted-foreground">Less waste. More meals. Made for Oklahoma.</p>
       </aside>
 
       {/* Mobile bottom bar */}
       <nav className="fixed inset-x-0 bottom-0 z-[1000] flex border-t bg-background md:hidden">
-        {LINKS.map(({ href, label, icon: Icon }) => (
+        {LINKS.map(({ href, short, icon: Icon }) => (
           <Link
             key={href}
             href={href}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 py-2 text-[11px] text-muted-foreground",
+              "flex flex-1 flex-col items-center gap-1 py-2 text-[10px] text-muted-foreground",
               path === href && "text-primary",
             )}
           >
             <Icon className="size-5" />
-            {label}
+            {short}
           </Link>
         ))}
       </nav>

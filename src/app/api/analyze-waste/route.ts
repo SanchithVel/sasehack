@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { claude, errorMessage, FALLBACK, MODEL } from "@/lib/claude";
-import { MENU } from "@/lib/data/business";
+import { getDb } from "@/lib/db";
 
 const WasteAnalysis = z.object({
   items: z.array(
@@ -16,11 +16,12 @@ const WasteAnalysis = z.object({
   notes: z.string(),
 });
 
-const menuList = MENU.map((m) => `- ${m.id}: ${m.name} (measured in ${m.unit})`).join("\n");
-
 // POST { image: base64 JPEG } → itemized estimate of leftover food in the photo.
 export async function POST(req: Request) {
   const { image } = (await req.json()) as { image: string };
+  const menuList = getDb()
+    .menu.map((m) => `- ${m.id}: ${m.name} (measured in ${m.unit}, ${m.lbsPerUnit} lbs per ${m.unit})`)
+    .join("\n");
   try {
     const res = await claude().beta.messages.parse({
       model: MODEL,
@@ -36,8 +37,9 @@ export async function POST(req: Request) {
               type: "text",
               text:
                 `This is an end-of-day photo of leftover food at a restaurant. Estimate each leftover food item, ` +
-                `its quantity, and its weight in lbs. Standard hotel pans hold about 8-10 lbs when full.\n\n` +
-                `Match items to this menu when possible (set itemId to the menu id, otherwise null) and use the menu's unit:\n${menuList}\n\n` +
+                `its quantity, and its weight in lbs. A full standard hotel pan holds about 8-10 lbs.\n\n` +
+                `Match items to this menu when possible: set itemId to the menu id and give quantity in that item's unit. ` +
+                `Otherwise set itemId to null.\n${menuList || "(no menu entered yet)"}\n\n` +
                 `In notes, give one short sentence on whether the leftovers look safe to donate or better for compost.`,
             },
           ],

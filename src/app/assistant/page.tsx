@@ -15,6 +15,8 @@ const SUGGESTIONS = [
   "How much should I prep tomorrow, and why?",
   "Draft an email to Regional Food Bank of Oklahoma about weekly pickups.",
   "Where can I send food scraps for compost?",
+  "Which local beef supplier would be cheapest for me?",
+  "What permits do I need to sell food in Oklahoma City?",
 ];
 
 export default function AssistantPage() {

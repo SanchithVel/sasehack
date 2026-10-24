@@ -1,6 +1,6 @@
 # PlateShare OK
 
-Helps small Oklahoma food businesses **predict** how much to prep, **log** waste from a photo, **redistribute** surplus to local food banks and shelters, and **measure** their community impact.
+Helps small Oklahoma food businesses **predict** how much to prep, **track** what they waste, **redistribute** surplus to local food banks, shelters, and compost, and **measure** their community impact.
 
 ## Setup
 
@@ -10,37 +10,45 @@ cp .env.example .env.local   # then paste your ANTHROPIC_API_KEY
 npm run dev                  # http://localhost:3000
 ```
 
-The dashboard, prep page (with a fallback summary), surplus page, and map all work without an API key. Photo logging and the assistant need one.
+Everything works without an API key: the forecast summary, website, and outreach emails fall back to plain templates. Photo waste estimates and the assistant need a key.
 
-## Stack
+## How the data works
 
-Next.js 16 (App Router) · TypeScript · Tailwind v4 + shadcn/ui · Claude API (`@anthropic-ai/sdk`) · Recharts · Leaflet/OpenStreetMap · Open-Meteo weather (no key).
+The app starts with **demo data** (a sample OKC taco shop with 35 days of generated logs). To use real numbers, go to **Setup → Start with my own business**, then:
+
+1. **Setup**: business details, the menu items you prep daily (unit, usual prep, cost and sale price per unit, lbs per unit), and upcoming events with an expected traffic change.
+2. **Daily Log**: at close, enter prepared / sold / thrown out for each item. "Thrown out" fills in as prepared − sold. A photo can optionally estimate it with Claude.
+3. **Surplus**: post leftovers for donation or compost. Claimed donations feed the meals, deduction, and CO₂ numbers.
+
+All data is saved to `data/db.json` (gitignored). **Load demo data** on the Setup page restores the sample.
+
+## Pages
+
+| Page | What it does |
+|---|---|
+| Dashboard (`/`) | $ and lbs wasted, waste reduction, meals donated, tax deduction estimate, CO₂, trend chart, and how each number is calculated |
+| Daily Log (`/log`) | Manual daily entry plus an optional photo that fills in waste amounts |
+| Prep Forecast (`/prep`) | Next 7 days: avg sold on the same weekday (last 4 weeks), +10% if it sold out, × events, × weather (Open-Meteo), +5% buffer |
+| Surplus & Partners (`/surplus`) | Donate or compost posts, a simulated partner claim, the partner directory with distance, ratings, a map, and one-click intro emails |
+| Website Builder (`/website`) | Claude generates a one-page site from Setup data. Preview, copy, or download |
+| Assistant (`/assistant`) | Claude with tools over the business's own data |
+| Setup (`/setup`) | Profile, menu, costs, events, and demo/reset |
 
 ## Where things live
 
 | Path | What |
 |---|---|
-| `src/app/page.tsx` | Dashboard: impact stats, waste trend, most-wasted items |
-| `src/app/log/` | Photo → Claude vision → itemized leftovers |
-| `src/app/prep/` | Tomorrow's prep forecast (history × events × weather) + Claude summary |
-| `src/app/surplus/` | Post surplus, claim pickups, partner directory + map |
-| `src/app/assistant/` | Chat assistant that calls tools over the app's data |
-| `src/app/api/*` | Route handlers (Claude calls stay server-side) |
-| `src/lib/claude.ts` | Claude client, model, and refusal fallback config |
-| `src/lib/store.ts` | In-memory store seeded with 35 days of demo history (resets on restart) |
+| `src/lib/db.ts` | JSON-file database (swap for Supabase if you deploy to Vercel) |
+| `src/lib/data/demo.ts` | Demo business and generated history |
+| `src/lib/data/partners.ts` | Partner directory and distance helper |
 | `src/lib/forecast.ts` | Prep forecast logic |
-| `src/lib/impact.ts` | Meals, CO₂, $ saved, tax-deduction estimates |
-| `src/lib/data/` | Demo business, menu, partners, local events |
+| `src/lib/impact.ts` | Waste, meals, CO₂, savings, and deduction calculations |
+| `src/lib/claude.ts` | Claude client, model, and refusal fallback config |
+| `src/lib/templates.ts` | Non-AI fallbacks for the website and emails |
+| `src/app/api/*` | Route handlers (Claude calls stay server-side) |
 
-## Demo data notes
+## Notes
 
-- Partners marked `sample: true` are made up. The real organizations have approximate map coordinates, so check them before demoing.
-- Events in `src/lib/data/events.ts` are generated relative to today so the forecast always has something to show.
-- Impact numbers are estimates: 1.2 lbs per meal (Feeding America), 2.5 kg CO₂e per kg of food waste, and a rough 1.5× deduction multiplier. This is not tax advice.
-
-## Suggested team split
-
-- **A:** Log Waste page and the photo prompt (`api/analyze-waste`)
-- **B:** Prep forecast and events (`lib/forecast.ts`, `lib/data/events.ts`)
-- **C:** Surplus flow, partners, and map. Stretch goal: real SMS via Twilio in `api/surplus`
-- **D:** Dashboard polish, assistant tools (`api/assistant`), and the pitch deck
+- Partners marked `sample` are made up, including their ratings and prices. The real organizations have approximate map coordinates, so check them before demoing.
+- Impact numbers are estimates: 1.2 lbs per meal (Feeding America), 2.5 kg CO₂e per kg of food kept out of landfill, and a simplified enhanced-deduction formula (lesser of cost + half the markup, or 2× cost). This is not tax advice.
+- Text alerts to partners are simulated. Twilio would go in `src/app/api/surplus/route.ts`.

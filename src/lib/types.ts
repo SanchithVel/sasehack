@@ -1,17 +1,34 @@
-export type Category = "protein" | "side" | "bread" | "fresh";
+export type Category = "main" | "side" | "bread" | "fresh" | "dessert" | "drink";
+export type Unit = "lbs" | "servings" | "pieces" | "dozen" | "trays" | "gallons";
 
 export type MenuItem = {
   id: string;
   name: string;
   category: Category;
-  unit: "lbs" | "dozen";
+  unit: Unit;
   /** What the owner usually preps per day, in `unit`. */
   usualPrep: number;
+  /** Ingredient + labor cost to make one unit. */
   costPerUnit: number;
+  /** What one unit sells for. */
+  pricePerUnit: number;
   lbsPerUnit: number;
 };
 
-/** One item's prep vs. sales for one day. */
+export type Profile = {
+  name: string;
+  ownerName: string;
+  cuisine: string;
+  city: string;
+  lat: number;
+  lng: number;
+  address: string;
+  phone: string;
+  hours: string;
+  description: string;
+};
+
+/** One item's prep vs. sales for one day, entered by the owner. */
 export type DailyRecord = {
   date: string; // YYYY-MM-DD
   itemId: string;
@@ -20,25 +37,40 @@ export type DailyRecord = {
   wasted: number;
 };
 
-/** A waste entry logged today (e.g. from a photo). */
-export type WasteLog = {
+/** Something on the calendar the owner expects to change traffic. */
+export type LocalEvent = {
   id: string;
   date: string;
   name: string;
-  quantity: number;
-  unit: string;
-  estLbs: number;
-  itemId: string | null;
-  source: "photo" | "manual";
+  /** Expected change in customers, e.g. 25 = +25%, -20 = -20%. */
+  changePct: number;
 };
 
-export type PartnerType =
-  | "food_bank"
-  | "shelter"
-  | "pantry"
-  | "farm"
-  | "compost"
-  | "supplier";
+export type SurplusPost = {
+  id: string;
+  createdAt: string;
+  kind: "donate" | "compost";
+  items: { name: string; quantity: number; unit: string }[];
+  estLbs: number;
+  pickupBy: string;
+  status: "open" | "claimed";
+  claimedBy?: string;
+};
+
+export type WebsiteDraft = { html: string; notes: string; createdAt: string };
+
+export type Db = {
+  /** True while the app is showing generated demo data. */
+  isDemo: boolean;
+  profile: Profile;
+  menu: MenuItem[];
+  records: DailyRecord[];
+  events: LocalEvent[];
+  surplus: SurplusPost[];
+  website: WebsiteDraft | null;
+};
+
+export type PartnerType = "food_bank" | "shelter" | "pantry" | "farm" | "compost" | "supplier";
 
 export type Partner = {
   id: string;
@@ -48,24 +80,8 @@ export type Partner = {
   lat: number;
   lng: number;
   description: string;
-  accepts: string[];
+  offers: string;
   rating?: number;
+  reviews?: number;
   sample?: boolean; // true = made-up demo data
-};
-
-export type SurplusPost = {
-  id: string;
-  createdAt: string;
-  items: { name: string; quantity: number; unit: string }[];
-  estLbs: number;
-  pickupBy: string;
-  status: "open" | "claimed";
-  claimedBy?: string;
-};
-
-export type LocalEvent = {
-  date: string;
-  name: string;
-  /** Demand multiplier per menu category, e.g. { protein: 1.3 }. */
-  multipliers: Partial<Record<Category, number>>;
 };
