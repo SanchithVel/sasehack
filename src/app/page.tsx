@@ -1,69 +1,93 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import Link from "next/link";
+import { connection } from "next/server";
+import { Camera, Leaf, Scale, Utensils, Wallet } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
+import { WasteTrendChart } from "@/components/waste-trend-chart";
+import { BUSINESS } from "@/lib/data/business";
+import { impactSummary, topWastedItems, wasteByDay } from "@/lib/impact";
 
-export default function Home() {
+export default function Dashboard() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-x-4 md:mb-0">
+        <PageHeader title={`Good evening, ${BUSINESS.name}`} subtitle="Your waste, your impact, and what to do next." />
+        <Link href="/log" className={buttonVariants()}>
+          <Camera /> Log tonight&apos;s waste
+        </Link>
+      </div>
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-muted" />}>
+        <DashboardContent />
+      </Suspense>
+    </>
+  );
+}
+
+async function DashboardContent() {
+  // Reads the in-memory store, so render on every request.
+  await connection();
+  const impact = impactSummary();
+  const trend = wasteByDay();
+  const top = topWastedItems(30).slice(0, 5);
+
+  const stats = [
+    { label: "Meals donated", value: impact.mealsDonated.toLocaleString(), sub: `${impact.donatedLbs} lbs in ${impact.donations} pickups`, icon: Utensils },
+    { label: "Waste reduced", value: `${impact.wasteReductionPct}%`, sub: "last 7 days vs. before", icon: Scale },
+    { label: "CO₂e avoided", value: `${impact.co2eKg} kg`, sub: `${impact.savedLbs} lbs kept out of landfill`, icon: Leaf },
+    { label: "Est. tax deduction", value: `$${impact.estTaxDeduction}`, sub: `+ $${impact.moneySavedPerMonth}/mo saved on prep`, icon: Wallet },
+  ];
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map(({ label, value, sub, icon: Icon }) => (
+          <Card key={label} size="sm">
+            <CardContent className="space-y-1">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Icon className="size-4 text-primary" /> {label}
+              </div>
+              <div className="text-2xl font-semibold">{value}</div>
+              <div className="text-xs text-muted-foreground">{sub}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Daily food waste</CardTitle>
+            <CardDescription>Pounds thrown out per day. Drops once prep follows the forecast.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WasteTrendChart data={trend} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Most wasted (30 days)</CardTitle>
+            <CardDescription>Where the money goes in the trash.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {top.map((item) => (
+              <div key={item.id} className="flex items-center justify-between text-sm">
+                <div>
+                  <div className="font-medium">{item.name}</div>
+                  <div className="text-xs text-muted-foreground">{item.wastedLbs} lbs wasted</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">${item.wastedCost}</div>
+                  <Badge variant={item.wasteRate > 15 ? "destructive" : "secondary"}>{item.wasteRate}% waste</Badge>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

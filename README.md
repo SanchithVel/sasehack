@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PlateShare OK
 
-## Getting Started
+Helps small Oklahoma food businesses **predict** how much to prep, **log** waste from a photo, **redistribute** surplus to local food banks and shelters, and **measure** their community impact.
 
-First, run the development server:
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then paste your ANTHROPIC_API_KEY
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dashboard, prep page (with a fallback summary), surplus page, and map all work without an API key. Photo logging and the assistant need one.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next.js 16 (App Router) · TypeScript · Tailwind v4 + shadcn/ui · Claude API (`@anthropic-ai/sdk`) · Recharts · Leaflet/OpenStreetMap · Open-Meteo weather (no key).
 
-## Learn More
+## Where things live
 
-To learn more about Next.js, take a look at the following resources:
+| Path | What |
+|---|---|
+| `src/app/page.tsx` | Dashboard: impact stats, waste trend, most-wasted items |
+| `src/app/log/` | Photo → Claude vision → itemized leftovers |
+| `src/app/prep/` | Tomorrow's prep forecast (history × events × weather) + Claude summary |
+| `src/app/surplus/` | Post surplus, claim pickups, partner directory + map |
+| `src/app/assistant/` | Chat assistant that calls tools over the app's data |
+| `src/app/api/*` | Route handlers (Claude calls stay server-side) |
+| `src/lib/claude.ts` | Claude client, model, and refusal fallback config |
+| `src/lib/store.ts` | In-memory store seeded with 35 days of demo history (resets on restart) |
+| `src/lib/forecast.ts` | Prep forecast logic |
+| `src/lib/impact.ts` | Meals, CO₂, $ saved, tax-deduction estimates |
+| `src/lib/data/` | Demo business, menu, partners, local events |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Demo data notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Partners marked `sample: true` are made up. The real organizations have approximate map coordinates, so check them before demoing.
+- Events in `src/lib/data/events.ts` are generated relative to today so the forecast always has something to show.
+- Impact numbers are estimates: 1.2 lbs per meal (Feeding America), 2.5 kg CO₂e per kg of food waste, and a rough 1.5× deduction multiplier. This is not tax advice.
 
-## Deploy on Vercel
+## Suggested team split
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **A:** Log Waste page and the photo prompt (`api/analyze-waste`)
+- **B:** Prep forecast and events (`lib/forecast.ts`, `lib/data/events.ts`)
+- **C:** Surplus flow, partners, and map. Stretch goal: real SMS via Twilio in `api/surplus`
+- **D:** Dashboard polish, assistant tools (`api/assistant`), and the pitch deck
